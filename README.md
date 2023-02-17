@@ -98,8 +98,8 @@ writing them to the stdout (e.g., using AWS SNS). It's also easy to create new a
         ├── domain                // Business models
         ├── infrastructureprt     // Ports (interfaces) for infrastructure
         └── interactorprt         // Ports (interfaces) for interactors
-    ├── infrastructure            // Primary/Driving adapters (e.g., files, queues, api, etc)
-    └── interactors               // Secondary/Driven adapters (e.g., stdout, databases, etc). 
+    ├── infrastructure            // Primary/Driving adapters - entrypoint (e.g., files, queues, api, etc)
+    └── interactors               // Secondary/Driven adapters (e.g., files, databases, etc). 
 ```
 
 ## FAQ
