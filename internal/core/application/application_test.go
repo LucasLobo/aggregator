@@ -51,7 +51,7 @@ func Test_calculateMovingAverage(t *testing.T) {
 		expectedResult []movingAverage
 	}{
 		{
-			name:           "test case 1",
+			name:           "happy case",
 			events:         createEvents(t),
 			windowSize:     10,
 			expectedResult: createResults(t),
