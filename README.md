@@ -43,12 +43,6 @@ The input file must have the following format:
 {"timestamp": "2018-12-26 18:23:19.903159","translation_id": "5aa5b2f39f7254a75bb3","source_language": "en","target_language": "fr","client_name": "taxi-eats","event_name": "translation_delivered","nr_words": 100, "duration": 54}
 ```
 
-| Flag        | Usage                                                   | Mandatory |
-|-------------|---------------------------------------------------------|-----------|
-| input_file  | File name where the input events are stored             | `true`    |
-| window_size | Window size to use in the moving average calculation    | `true`    |
-| output_type | Where to write the output. Options: `file` and `stdout` | `false`   |
-
 The lines in the input must be ordered by the `timestamp` key, from lower (oldest) to higher values, just like in the 
 example input above.
 
@@ -70,6 +64,17 @@ The output file will have the following format.
 {"date": "2018-12-26 18:23:00", "average_delivery_time": 31}
 {"date": "2018-12-26 18:24:00", "average_delivery_time": 42.5}
 ```
+
+## Flags
+
+Below are the flags provided by the tool:
+
+| Flag        | Usage                                                   | Mandatory |
+|-------------|---------------------------------------------------------|-----------|
+| input_file  | File name where the input events are stored             | `true`    |
+| window_size | Window size to use in the moving average calculation    | `true`    |
+| output_type | Where to write the output. Options: `file` and `stdout` | `false`   |
+
 
 ## Example
 
@@ -108,10 +113,10 @@ Q2: How does the algorithm for calculating the moving averages work?
 A2: The algorithm uses the sliding window technique and has a time complexity of O(N), where N is the time between the
 first and last event. It has a running total/count, which it uses to calculate the average at each step. The head and
 tail are used to add/remove from these running values. It has an additional space complexity of O(M) where M is the
-window size (and O(N) for the result).
-
-![Sliding Window](sliding_window.jpg)
+window size (and O(N) for the result). You can find a diagram at the bottom of this page.
 
 Q3: How would you improve the algorithm?  
 A3: It could be turned into a continuously running algorithm that calculates the moving average as more inputs are 
 provided. This would make it more dynamic and useful in the real world. The current algorithm expects all events at once. 
+
+![Sliding Window](sliding_window.jpg)
