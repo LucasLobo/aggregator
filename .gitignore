@@ -1,5 +1,7 @@
 .idea
-/bin
 .DS_Store
 vendor/
 
+events_*.json
+
+aggregator-cli
