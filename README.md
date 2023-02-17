@@ -119,4 +119,15 @@ window size (and O(N) for the result). You can find a diagram at the bottom of t
 A3: It could be turned into a continuously running algorithm that calculates the moving average as more inputs are 
 provided. This would make it more dynamic and useful in the real world. The current algorithm expects all events at once. 
 
+**Q4: What could you have done to make this even better?**  
+A4: There are a couple of things that could have been done to improve this solution, which I thought about but
+did not due to a lack of time:
+- Adding e2e/integration tests to ensure that the file reading and writing work as well as the algorithm
+itself.
+- Adding more unit tests. Including in other parts of the architecture (outside the business logic).
+- Adding Docker.
+- Adding a Makefile.
+- Testing the business logic with proper mocks.
+- Maybe un-overengineer this if the goal is to use and extend the tool in the future only as a CLI.
+
 ![Sliding Window](sliding_window.jpg)
