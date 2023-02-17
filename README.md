@@ -90,16 +90,16 @@ extended to read from queues instead of files (e.g., such as AWS SQS) and to emi
 writing them to the stdout (e.g., using AWS SNS). It's also easy to create new aggregation methods.
 
 ```
-┌── cmd                                         // Commands to run the application
-└── internal                                    // Everything that is internal to the application
-    ├── common                                  // Common modules used in multiple places within application
-    ├── core                                    // Core (business logic)
-        ├── application                         // Business logic. Implements interactorprt and uses infrastructureprt
-        ├── domain                              // Business models
-        ├── infrastructureprt                   // Ports (interfaces) for infrastructure
-        └── interactorprt                       // Ports (interfaces) for interactors
-    ├── infrastructure                          // Primary/Driving adapters (e.g., files, queues, api, etc)
-    └── interactors                             // Secondary/Driven adapters (e.g., stdout, databases, etc). 
+┌── cmd                           // Commands to run the application
+└── internal                      // Everything that is internal to the application
+    ├── common                    // Common modules used in multiple places within application
+    ├── core                      // Core (business logic)
+        ├── application           // Business logic. Implements interactorprt and uses infrastructureprt
+        ├── domain                // Business models
+        ├── infrastructureprt     // Ports (interfaces) for infrastructure
+        └── interactorprt         // Ports (interfaces) for interactors
+    ├── infrastructure            // Primary/Driving adapters (e.g., files, queues, api, etc)
+    └── interactors               // Secondary/Driven adapters (e.g., stdout, databases, etc). 
 ```
 
 ## FAQ
