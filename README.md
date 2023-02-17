@@ -104,18 +104,18 @@ writing them to the stdout (e.g., using AWS SNS). It's also easy to create new a
 
 ## FAQ
 
-Q1: Is so much code really needed?  
+**Q1: Is so much code really needed?**  
 A1: The answer to this question is a simple no. I wanted to take this opportunity to implement a new project
 from scratch using a Hexagonal Architecture, and while it is definitely overengineered for this purpose, it also allows
 me to experiment and showcase my architectural skills.
 
-Q2: How does the algorithm for calculating the moving averages work?  
+**Q2: How does the algorithm for calculating the moving averages work?**  
 A2: The algorithm uses the sliding window technique and has a time complexity of O(N), where N is the time between the
 first and last event. It has a running total/count, which it uses to calculate the average at each step. The head and
 tail are used to add/remove from these running values. It has an additional space complexity of O(M) where M is the
 window size (and O(N) for the result). You can find a diagram at the bottom of this page.
 
-Q3: How would you improve the algorithm?  
+**Q3: How would you improve the algorithm?**  
 A3: It could be turned into a continuously running algorithm that calculates the moving average as more inputs are 
 provided. This would make it more dynamic and useful in the real world. The current algorithm expects all events at once. 
 
