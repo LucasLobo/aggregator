@@ -45,7 +45,9 @@ type state struct {
 // Each event's duration counts for the average for the minutes following timestamp up to the windowSize.
 // e.g., windowSize = 2, 2018-12-26 18:11:08.509654 counts towards 2018-12-26 18:12:00 and 2018-12-26 18:13:00
 func calculateMovingAverage(events []domain.TranslationDelivered, windowSize int) []movingAverage {
-
+	if len(events) == 0 {
+		return nil
+	}
 	// NOTE: I've tried to implement this sliding window average in multiple ways, including a slidingWindow struct
 	// with the main method and multiple sub-methods. e.g., advanceHead, advanceTail, calculateAverage.
 	// Usually for longer functions like this one I try to split it into multiple smaller functions that have a clear
