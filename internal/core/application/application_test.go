@@ -23,6 +23,16 @@ func (ms *mockStorer) StoreMovingAverage(deliveryTime domain.AverageDeliveryTime
 	return nil
 }
 
+func (ms *mockStorer) StoreMovingAverageSlice(deliveryTimes []domain.AverageDeliveryTime) error {
+	for _, deliveryItem := range deliveryTimes {
+		err := ms.StoreMovingAverage(deliveryItem)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (ms *mockStorer) Close() error {
 	return nil
 }

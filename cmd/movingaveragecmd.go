@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"strings"
+	"time"
 
 	"github.com/lucaslobo/aggregator-cli/internal/common/logs"
 	"github.com/lucaslobo/aggregator-cli/internal/core/application"
@@ -28,6 +29,8 @@ var MovingAverageCommand = &cli.Command{
 }
 
 func runMovingAverageCommand(ctx *cli.Context) error {
+	start := time.Now()
+
 	logger, ok := ctx.App.Metadata["Logger"].(logs.Logger)
 	if !ok {
 		return errors.New("could not get logger")
@@ -72,7 +75,8 @@ func runMovingAverageCommand(ctx *cli.Context) error {
 		return err
 	}
 
-	logger.Infow("Successfully calculated moving average from file")
+	elapsed := time.Since(start)
+	logger.Infow("Successfully calculated moving average from file", "time", elapsed)
 
 	return nil
 }

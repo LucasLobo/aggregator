@@ -24,6 +24,16 @@ func (s StdOut) StoreMovingAverage(item domain.AverageDeliveryTime) error {
 	return nil
 }
 
+func (s StdOut) StoreMovingAverageSlice(items []domain.AverageDeliveryTime) error {
+	for _, item := range items {
+		err := s.StoreMovingAverage(item)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (s StdOut) Close() error {
 	// there's no point in closing anything here, let's just return silently
 	return nil

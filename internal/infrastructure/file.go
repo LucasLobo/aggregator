@@ -62,8 +62,6 @@ func (f *FileWriter) StoreMovingAverage(dt domain.AverageDeliveryTime) error {
 	if err != nil {
 		return err
 	}
-	f.logger.Infow("Writing to file...",
-		"path", f.outputFilePath)
 	if err := f.encoder.Encode(dt); err != nil {
 		return err
 	}
@@ -75,8 +73,6 @@ func (f *FileWriter) StoreMovingAverageSlice(deliveryTimes []domain.AverageDeliv
 	if err != nil {
 		return err
 	}
-	f.logger.Infow("Writing to file...",
-		"path", f.outputFilePath)
 
 	for _, dt := range deliveryTimes {
 		if err = f.encoder.Encode(dt); err != nil {
