@@ -15,15 +15,16 @@ func NewStdOut() StdOut {
 	return StdOut{}
 }
 
-func (s StdOut) StoreMovingAverage(deliveryTimes []domain.AverageDeliveryTime) error {
-	fmt.Println("OUTPUT START")
-	for _, item := range deliveryTimes {
-		bytes, err := json.Marshal(item)
-		if err != nil {
-			return fmt.Errorf("error marshalling JSON: %w", err)
-		}
-		fmt.Println(string(bytes))
+func (s StdOut) StoreMovingAverage(item domain.AverageDeliveryTime) error {
+	bytes, err := json.Marshal(item)
+	if err != nil {
+		return fmt.Errorf("error marshalling JSON: %w", err)
 	}
-	fmt.Println("OUTPUT END")
+	fmt.Println(string(bytes))
+	return nil
+}
+
+func (s StdOut) Close() error {
+	// there's no point in closing anything here, let's just return silently
 	return nil
 }

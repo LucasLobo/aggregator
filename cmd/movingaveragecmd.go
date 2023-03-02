@@ -62,6 +62,7 @@ func runMovingAverageCommand(ctx *cli.Context) error {
 	} else {
 		storer = infrastructure.NewStdOut()
 	}
+	defer storer.Close()
 	app := application.New(storer)
 
 	fileProcessor := interactors.NewFileProcessor(logger, app)

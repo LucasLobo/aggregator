@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/lucaslobo/aggregator-cli/internal/common/closer"
 	"github.com/lucaslobo/aggregator-cli/internal/common/logs"
 	"github.com/lucaslobo/aggregator-cli/internal/core/domain"
 )
@@ -17,37 +16,70 @@ import (
 type FileWriter struct {
 	logger   logs.Logger
 	filename string
+
+	file           *os.File
+	encoder        *json.Encoder
+	outputFilePath string
 }
 
-func NewFileWriter(logger logs.Logger, filename string) FileWriter {
-	return FileWriter{
+func NewFileWriter(logger logs.Logger, filename string) *FileWriter {
+	return &FileWriter{
 		logger:   logger,
 		filename: filename,
 	}
 }
 
-func (f FileWriter) StoreMovingAverage(deliveryTimes []domain.AverageDeliveryTime) error {
+func (f *FileWriter) Close() error {
+	file := f.file
+	f.file = nil
+	f.encoder = nil
+	return file.Close()
+}
+
+func (f *FileWriter) setupJSONEncoder() error {
+	if f.encoder != nil {
+		return nil
+	}
+
 	outputDir, err := createDir(f.filename, "output")
 	if err != nil {
 		return err
 	}
 
-	outputFilePath := getOutputPath(f.filename, outputDir)
+	f.outputFilePath = getOutputPath(f.filename, outputDir)
 
-	file, err := os.Create(outputFilePath)
+	file, err := os.Create(f.outputFilePath)
 	if err != nil {
 		return err
 	}
-	defer closer.Close(f.logger, file)
 
-	encoder := json.NewEncoder(file)
+	f.encoder = json.NewEncoder(file)
+	return nil
+}
 
+func (f *FileWriter) StoreMovingAverage(dt domain.AverageDeliveryTime) error {
+	err := f.setupJSONEncoder()
+	if err != nil {
+		return err
+	}
 	f.logger.Infow("Writing to file...",
-		"path", outputFilePath)
+		"path", f.outputFilePath)
+	if err := f.encoder.Encode(dt); err != nil {
+		return err
+	}
+	return nil
+}
 
-	// We write to the file line by line because it's not the standard json format
+func (f *FileWriter) StoreMovingAverageSlice(deliveryTimes []domain.AverageDeliveryTime) error {
+	err := f.setupJSONEncoder()
+	if err != nil {
+		return err
+	}
+	f.logger.Infow("Writing to file...",
+		"path", f.outputFilePath)
+
 	for _, dt := range deliveryTimes {
-		if err := encoder.Encode(dt); err != nil {
+		if err = f.encoder.Encode(dt); err != nil {
 			return err
 		}
 	}
