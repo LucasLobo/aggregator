@@ -17,14 +17,14 @@ Example:
 
 ```json
 {
-	"timestamp": "2018-12-26 18:12:19.903159",
-	"translation_id": "5aa5b2f39f7254a75aa4",
-	"source_language": "en",
-	"target_language": "fr",
-	"client_name": "airliberty",
-	"event_name": "translation_delivered",
-	"duration": 20,
-	"nr_words": 100
+    "timestamp": "2018-12-26 18:12:19.903159",
+    "translation_id": "5aa5b2f39f7254a75aa4",
+    "source_language": "en",
+    "target_language": "fr",
+    "client_name": "airliberty",
+    "event_name": "translation_delivered",
+    "duration": 20,
+    "nr_words": 100
 }
 ```
 
