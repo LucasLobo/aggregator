@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -17,14 +18,17 @@ const inputFileFlagPropName = "input_file"
 const windowSizeFlagPropName = "window_size"
 const outputTypeFlagPropName = "output_type"
 
-// MovingAverageCommand is the command to run the web server
+const fileOutputType = "file"
+const stdoutOutputType = "stdout"
+
+// MovingAverageCommand is the command to calculate the moving average aggregation from a file
 var MovingAverageCommand = &cli.Command{
 	Name:   "moving-average",
 	Action: runMovingAverageCommand,
 	Flags: []cli.Flag{
 		&cli.StringFlag{Name: inputFileFlagPropName, Required: true, Usage: "File (.json) that contains input events"},
 		&cli.IntFlag{Name: windowSizeFlagPropName, Required: true, Usage: "Moving average window size in minutes"},
-		&cli.StringFlag{Name: outputTypeFlagPropName, Required: false, Usage: "Output type (file or stdout)", Value: "file"},
+		&cli.StringFlag{Name: outputTypeFlagPropName, Required: false, Usage: fmt.Sprintf("Output type (%s or %s)", fileOutputType, stdoutOutputType), Value: fileOutputType},
 	},
 }
 
@@ -50,9 +54,9 @@ func runMovingAverageCommand(ctx *cli.Context) error {
 		return errors.New("must provide input file")
 	}
 
-	if outputType != "file" && outputType != "stdout" {
-		outputType = "stdout"
-		logger.Warnw("output type must be file or stdout, using default value of stdout")
+	if outputType != fileOutputType && outputType != stdoutOutputType {
+		outputType = stdoutOutputType
+		logger.Warnf("output type must be file or stdout, using default value of %s", stdoutOutputType)
 	}
 
 	logger.Infow("Running Moving Average Command",
@@ -60,7 +64,7 @@ func runMovingAverageCommand(ctx *cli.Context) error {
 		windowSizeFlagPropName, windowSize)
 
 	var storer infrastructureprt.MovingAverageStorer
-	if outputType == "file" {
+	if outputType == fileOutputType {
 		storer = infrastructure.NewFileWriter(logger, inputFile)
 	} else {
 		storer = infrastructure.NewStdOut()

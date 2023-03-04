@@ -26,7 +26,7 @@ func main() {
 	app := cli.App{
 		Name:        Name,
 		Version:     Version,
-		Description: "Simple command line application that parses a stream of events and produces an aggregated output.",
+		Description: "Parse a stream of events to produce an aggregated output.",
 		Before:      setupBefore,
 		Commands: []*cli.Command{
 			cmd.MovingAverageCommand,
@@ -35,8 +35,8 @@ func main() {
 	}
 	app.Flags = append(app.Flags, []cli.Flag{}...)
 
-	err := app.Run(os.Args)
 	defer l.Sync() // flushes buffer, if any
+	err := app.Run(os.Args)
 
 	if err != nil {
 		fmt.Printf("%s\n", err)
