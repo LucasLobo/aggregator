@@ -1,15 +1,14 @@
-# Moving Average CLI
+# Aggregator CLI
 
-Simple command line application that parses a stream of events and produces an aggregated output. 
+Simple command line application that calculates an aggregated metric based on the input events. It currently supports 
+calculating the moving average for the last X minutes.
 
-For every minute, the application produces a moving average of the translation delivery time for the last X minutes.
+The input events can be fetched from a file or from AWS SQS. The output events can be written to a file or to the stdout.
 
 ## Context
 
-We deal with a lot of translation data. One of the metrics we use for our clients' SLAs is the delivery time of a 
-translation. 
-
-In the context of this problem, our translation flow is modeled as only one event.
+One of the metrics we use for our clients' SLAs is the delivery time of a translation. In the context of this problem,
+our translation flow is modeled as only one event.
 
 ### *translation_delivered*
 
@@ -33,7 +32,7 @@ Example:
 To calculate, for each minute, the moving average delivery time of all translations for the past 10 minutes you should 
 call the application like this:
 
-	./aggregator-cli moving-average --input_file example/events.json --window_size 10
+	./aggregator-cli moving-average --window_size 10 --input_file example/events.json --output_folder example/output
 	
 The input file must have the following format:
 
@@ -67,16 +66,24 @@ The output file will have the following format.
 
 ## Flags
 
-Below are the flags provided by the tool:
+Below are the flags that can be used to configure the tool:
 
-| Flag        | Usage                                                   | Mandatory |
-|-------------|---------------------------------------------------------|-----------|
-| input_file  | File name where the input events are stored             | `true`    |
-| window_size | Window size to use in the moving average calculation    | `true`    |
-| output_type | Where to write the output. Options: `file` and `stdout` | `false`   |
+| Flag          | Usage                                                | Mandatory | Note                                                      |
+|---------------|------------------------------------------------------|-----------|-----------------------------------------------------------|
+| window_size   | Window size to use in the moving average calculation | `true`    | Defaults to 10 if < 1                                     | 
+| input_file    | File name where the input events are stored          | `false`   | Either `input_file` or `queue_url` must be provided       | 
+| queue_url     | SQS Queue from which to read the events              | `false`   | Either `input_file` or `queue_url` must be provided       | 
+| output_folder | Folder where output events will be written to        | `false`   | If none is provided, output will be printed to the stdout | 
 
+## Reading from AQS SQS Queue
+To read from an AWS SQS queue you must:
 
-## Example
+1. Create an AWS SQS Queue (FIFO).
+2. Authenticate AWS locally. Follow [these instructions from AWS Docs](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html). `LoadDefaultConfig` is used to get the values.
+3. Run the CLI like this `./aggregator-cli moving-average --window_size 10 --queue_url QUEUE_URL --output_folder example/output`
+4. Add messages to queue. Each message should have the same format as one of the input lines.
+
+## Example Input
 
 An example input file is provided in `example/input.json`.
 
@@ -86,8 +93,8 @@ This project is *slightly* (wink) overengineered for this purpose. The motivatio
 the code challenge but also to experiment with the hexagonal architecture pattern.
 
 The hexagonal architecture is used isolate the business logic from the input and output. The project can be easily 
-extended to read from queues instead of files (e.g., such as AWS SQS) and to emit events with the results instead of 
-writing them to the stdout (e.g., using AWS SNS). It's also easy to create new aggregation methods.
+extended to read from other input sources and to emit events with the results instead of writing them to files/stdout 
+(e.g., using AWS SNS). It's also easy to create new aggregation methods besides moving average.
 
 ```
 ┌── cmd                           // Commands to run the application
@@ -126,14 +133,15 @@ A4.1: With this algorithm we only calculate the moving average for each time-buc
 means that in a real-world scenario we would be idle for that time. We could pre-configure a maximum threshold of
 waiting time to starting processing the next time-bucket (e.g., if we have two events one hour apart, we would be
 waiting for 60 minutes and then process 60 time-buckets at once. If we add a threshold of 3 minutes, we could process 
-time-bucket of minute 1 at minute 4, minute 2 at minute 5, etc, instead of waiting another 60 minutes).  
+time-bucket of minute 1 at minute 4, minute 2 at minute 5, etc., instead of waiting another 60 minutes).  
 A4.2: Additionally, since we read from the file one-by-one and write to the file one-by-one, we lose some time for each
 fetch and each store. We could put the fetch and store processes in separate go-routines and run them concurrently to 
 save some IO time.
 
 **Q5: What could you have done to make this even better?**  
-A4: There are a couple of things that could have been done to improve this solution, which I thought about but
+A5: There are a couple of things that could have been done to improve this solution, which I thought about but
 did not due to a lack of time:
+- Emit output events to AWS SNS or similar.
 - Adding e2e/integration tests to ensure that the file reading and writing work as well as the algorithm
 itself.
 - Adding more unit tests. Including in other parts of the architecture (outside the business logic).

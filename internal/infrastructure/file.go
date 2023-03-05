@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/lucaslobo/aggregator-cli/internal/common/logs"
@@ -14,18 +12,18 @@ import (
 
 // FileWriter is an implementation of a MovingAverageStorer that writes to a file.
 type FileWriter struct {
-	logger   logs.Logger
-	filename string
+	logger logs.Logger
+	folder string
 
 	file           *os.File
 	encoder        *json.Encoder
 	outputFilePath string
 }
 
-func NewFileWriter(logger logs.Logger, filename string) *FileWriter {
+func NewFileWriter(logger logs.Logger, folder string) *FileWriter {
 	return &FileWriter{
-		logger:   logger,
-		filename: filename,
+		logger: logger,
+		folder: folder,
 	}
 }
 
@@ -41,12 +39,12 @@ func (f *FileWriter) setupJSONEncoder() error {
 		return nil
 	}
 
-	outputDir, err := createDir(f.filename, "output")
+	outputDir, err := createDir(f.folder)
 	if err != nil {
 		return err
 	}
 
-	f.outputFilePath = getOutputPath(f.filename, outputDir)
+	f.outputFilePath = getOutputPath(outputDir, "events")
 
 	file, err := os.Create(f.outputFilePath)
 	if err != nil {
@@ -83,22 +81,18 @@ func (f *FileWriter) StoreMovingAverageSlice(deliveryTimes []domain.AverageDeliv
 	return nil
 }
 
-func createDir(filename, dirname string) (string, error) {
-	dir := filepath.Dir(filename)
-	outputDir := filepath.Join(dir, dirname)
-
+func createDir(dir string) (string, error) {
 	// Create the output directory if it doesn't exist
-	if err := os.MkdirAll(outputDir, os.ModePerm); err != nil {
+	if err := os.MkdirAll(dir, os.ModePerm); err != nil {
 		return "", err
 	}
-	return outputDir, nil
+	return dir, nil
 }
 
-func getOutputPath(filename, dirname string) string {
-	basename := strings.TrimSuffix(filepath.Base(filename), filepath.Ext(filename))
+func getOutputPath(dirpath, filename string) string {
 	now := time.Now()
 	datetime := now.Format("20060102150405")
-	outputFileName := fmt.Sprintf("%s_%s%s", basename, datetime, ".json")
-	outputFilePath := fmt.Sprintf("%s/%s", dirname, outputFileName)
+	outputFileName := fmt.Sprintf("%s_%s%s", filename, datetime, ".json")
+	outputFilePath := fmt.Sprintf("%s/%s", dirpath, outputFileName)
 	return outputFilePath
 }
