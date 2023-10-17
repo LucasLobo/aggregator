@@ -15,7 +15,7 @@ import (
 // client is a wrapper for the SQS client that makes working with SQS simpler
 type client struct {
 	logger              logs.Logger
-	sqsClient           sqs.Client
+	sqsClient           *sqs.Client
 	sqsURL              string
 	maxNumberOfMessages int
 	waitTimeSeconds     int
@@ -42,7 +42,7 @@ func (s client) GetMessages(ctx context.Context) (*sqs.ReceiveMessageOutput, err
 
 	msgOutput, err := s.sqsClient.ReceiveMessage(ctx, input)
 	if err != nil {
-		return nil, fmt.Errorf("could not get message: %w", err)
+		return nil, fmt.Errorf("could not receive message from sqs: %w", err)
 	}
 
 	return msgOutput, nil
@@ -55,7 +55,7 @@ func (s client) SendMessage(ctx context.Context, message awsSQSTypes.Message) er
 		QueueUrl:    aws.String(s.sqsURL),
 	})
 	if err != nil {
-		return fmt.Errorf("could not send message: %w", err)
+		return fmt.Errorf("could not send message to sqs: %w", err)
 	}
 
 	return nil
@@ -70,7 +70,7 @@ func (s client) Delete(ctx context.Context, message awsSQSTypes.Message) error {
 
 	_, err := s.sqsClient.DeleteMessage(ctx, &input)
 	if err != nil {
-		return fmt.Errorf("could not delete message: %w", err)
+		return fmt.Errorf("could not delete message from sqs: %w", err)
 	}
 	return nil
 }
@@ -85,7 +85,7 @@ func (s client) ChangeMessageVisibility(ctx context.Context, receiptHandle *stri
 
 	_, err := s.sqsClient.ChangeMessageVisibility(ctx, &input)
 	if err != nil {
-		return fmt.Errorf("could not change message visibility: %w", err)
+		return fmt.Errorf("could not change message visibility in sqs: %w", err)
 	}
 
 	return nil

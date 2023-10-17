@@ -31,7 +31,10 @@ func (f *FileWriter) Close() error {
 	file := f.file
 	f.file = nil
 	f.encoder = nil
-	return file.Close()
+	if file != nil {
+		return file.Close()
+	}
+	return nil
 }
 
 func (f *FileWriter) setupJSONEncoder() error {
@@ -51,6 +54,7 @@ func (f *FileWriter) setupJSONEncoder() error {
 		return err
 	}
 
+	f.file = file
 	f.encoder = json.NewEncoder(file)
 	return nil
 }
@@ -60,7 +64,7 @@ func (f *FileWriter) StoreMovingAverage(dt domain.AverageDeliveryTime) error {
 	if err != nil {
 		return err
 	}
-	if err := f.encoder.Encode(dt); err != nil {
+	if err = f.encoder.Encode(dt); err != nil {
 		return err
 	}
 	return nil

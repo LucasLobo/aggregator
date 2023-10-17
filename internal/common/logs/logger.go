@@ -6,6 +6,9 @@ import (
 	"go.uber.org/zap"
 )
 
+// Logger is a simple wrapper around *zap.SugaredLogger
+// currently this wrapping doesn't offer many benefits, but it could be used to abstract
+// the underlying logger into a common logging interface
 type Logger struct {
 	*zap.SugaredLogger
 }

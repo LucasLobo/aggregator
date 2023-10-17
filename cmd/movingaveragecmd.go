@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -9,6 +10,7 @@ import (
 	awsSqs "github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/urfave/cli/v2"
 
+	"github.com/lucaslobo/aggregator-cli/internal/common/closer"
 	"github.com/lucaslobo/aggregator-cli/internal/common/logs"
 	"github.com/lucaslobo/aggregator-cli/internal/common/sqs"
 	"github.com/lucaslobo/aggregator-cli/internal/core/application"
@@ -17,10 +19,13 @@ import (
 	"github.com/lucaslobo/aggregator-cli/internal/interactors"
 )
 
-const windowSizeFlagPropName = "window_size"
-const inputFileFlagPropName = "input_file"
-const outputFolderFlagPropName = "output_folder"
-const inputQueueFlagPropName = "queue_url"
+const (
+	// prop names are used to identify values for the CLI commands
+	windowSizeFlagPropName   = "window_size"
+	inputFileFlagPropName    = "input_file"
+	outputFolderFlagPropName = "output_folder"
+	inputQueueFlagPropName   = "queue_url"
+)
 
 type cmdCfg struct {
 	logger logs.Logger
@@ -52,7 +57,7 @@ func runMovingAverageCommand(ctx *cli.Context) error {
 		return err
 	}
 
-	defer cfg.storer.Close()
+	defer closer.Close(cfg.logger, cfg.storer)
 
 	if cfg.inputFile != "" {
 		err = processFromFile(ctx, cfg)
@@ -61,9 +66,8 @@ func runMovingAverageCommand(ctx *cli.Context) error {
 	}
 
 	if err != nil {
-		return errors.New("error processing input:" + err.Error())
+		return fmt.Errorf("error processing input: %w", err)
 	}
-
 	return nil
 }
 
@@ -93,14 +97,12 @@ func initCmd(ctx *cli.Context) (cmdCfg, error) {
 	if inputFile != "" && queueURL != "" {
 		return cmdCfg{}, errors.New("cannot provide both input file and queue URL")
 	}
-	if outputFolder == "" {
-		logger.Warn("Output folder not provided, writing to stdout instead")
-	}
 
 	var storer infrastructureprt.MovingAverageStorer
 	if outputFolder != "" {
 		storer = infrastructure.NewFileWriter(logger, outputFolder)
 	} else {
+		logger.Warn("Output folder not provided, writing to stdout instead")
 		storer = infrastructure.NewStdOut()
 	}
 
@@ -109,9 +111,9 @@ func initCmd(ctx *cli.Context) (cmdCfg, error) {
 	cfg := cmdCfg{
 		logger:       logger,
 		windowSize:   windowSize,
+		queueURL:     queueURL,
 		inputFile:    inputFile,
 		outputFolder: outputFolder,
-		queueURL:     queueURL,
 		storer:       storer,
 		app:          app,
 	}
@@ -120,7 +122,7 @@ func initCmd(ctx *cli.Context) (cmdCfg, error) {
 }
 
 func processFromFile(_ *cli.Context, cfg cmdCfg) error {
-	cfg.logger.Infow("Running Moving Average Command",
+	cfg.logger.Infow("Running Moving Average Command from file",
 		inputFileFlagPropName, cfg.inputFile,
 		windowSizeFlagPropName, cfg.windowSize)
 
@@ -151,7 +153,7 @@ func processFromQueue(ctx *cli.Context, cfg cmdCfg) error {
 
 	queueCfg := sqs.ConfigSQS{
 		Logger:              cfg.logger,
-		SqsClient:           *sqsClient,
+		SqsClient:           sqsClient,
 		SqsURL:              cfg.queueURL,
 		MaxNumberOfMessages: 1,
 		WaitTimeSeconds:     15,

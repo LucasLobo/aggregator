@@ -36,28 +36,28 @@ func NewQueueConsumer(logger logs.Logger, queueClient Queue, app application.App
 }
 
 // PollAndProcess polls the queue and processes the messages
-func (q *QueueConsumer) PollAndProcess(ctx context.Context, windowSize int) {
-	q.app.Init(windowSize)
+func (c *QueueConsumer) PollAndProcess(ctx context.Context, windowSize int) {
+	c.app.Init(windowSize)
 
 	// indefinitely poll queue for messages
 	for {
-		messages, err := q.readQueueMessages(ctx)
+		messages, err := c.readQueueMessages(ctx)
 		if errors.Is(err, errNoMessages) {
-			q.logger.Info("no messages found")
+			c.logger.Info("no messages found")
 			continue
 		} else if err != nil {
-			q.logger.Errorw("unexpected error when reading queue",
+			c.logger.Errorw("unexpected error when reading queue",
 				"error", err)
 			continue
 		}
-		q.processMessages(ctx, messages)
+		c.processMessages(ctx, messages)
 	}
 }
 
 var errNoMessages = errors.New("no sqs messages found")
 
-func (q *QueueConsumer) readQueueMessages(ctx context.Context) ([]awsSQSTypes.Message, error) {
-	res, err := q.queueClient.GetMessages(ctx)
+func (c *QueueConsumer) readQueueMessages(ctx context.Context) ([]awsSQSTypes.Message, error) {
+	res, err := c.queueClient.GetMessages(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -68,26 +68,29 @@ func (q *QueueConsumer) readQueueMessages(ctx context.Context) ([]awsSQSTypes.Me
 	return res.Messages, nil
 }
 
-func (q *QueueConsumer) processMessages(ctx context.Context, messages []awsSQSTypes.Message) {
-	q.logger.Infow("read messages from queue", "quantity", len(messages))
+func (c *QueueConsumer) processMessages(ctx context.Context, messages []awsSQSTypes.Message) {
+	c.logger.Infow("read messages from queue", "quantity", len(messages))
 	for _, message := range messages {
 		if message.Body != nil {
 			var event domain.TranslationDelivered
 			err := json.Unmarshal([]byte(*message.Body), &event)
 			if err != nil {
-				q.logger.Errorw("error unmarshalling message", "error", err)
+				// for simplicity purposes, when an error occurs we simply log it...
+				// ideally we'd have a better error handler, such as reporting the error to Sentry/NR
+				// and managing the message in the DLQ
+				c.logger.Errorw("error unmarshalling message", "error", err)
 				return
 			}
 
-			err = q.app.ProcessEvent(event)
+			err = c.app.ProcessEvent(event)
 			if err != nil {
-				q.logger.Errorw("could not process message", "error", err)
+				c.logger.Errorw("could not process message", "error", err)
 				return
 			}
 
-			err = q.queueClient.Delete(ctx, message)
+			err = c.queueClient.Delete(ctx, message)
 			if err != nil {
-				q.logger.Errorw("could not delete from queue", "error", err)
+				c.logger.Errorw("could not delete from queue", "error", err)
 				return
 			}
 		}

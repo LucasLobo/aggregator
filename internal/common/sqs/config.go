@@ -9,7 +9,7 @@ import (
 // ConfigSQS is used to provide configuration parameters to set up the SQS client wrapper
 type ConfigSQS struct {
 	Logger              logs.Logger
-	SqsClient           sqs.Client
+	SqsClient           *sqs.Client
 	SqsURL              string
 	MaxNumberOfMessages int
 	WaitTimeSeconds     int

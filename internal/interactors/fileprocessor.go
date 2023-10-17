@@ -24,8 +24,9 @@ func NewFileProcessor(logger logs.Logger, app application.Application) FileProce
 	}
 }
 
+// CalculateMovingAverageFromFile calculates the moving average with a certain windowSize for the events stored in the
+// relative path in filename.
 func (f FileProcessor) CalculateMovingAverageFromFile(filename string, windowSize int) error {
-
 	file, err := os.Open(filename)
 	if err != nil {
 		return fmt.Errorf("failed to open file: %w", err)
@@ -34,8 +35,7 @@ func (f FileProcessor) CalculateMovingAverageFromFile(filename string, windowSiz
 
 	f.app.Init(windowSize)
 
-	// We can't scan it in one go because it doesn't have the proper json format
-	// Let's scan line by line instead
+	// Let's scan the input file line by line to avoid storing the full file in memory
 	scanner := bufio.NewScanner(file)
 
 	for scanner.Scan() {
@@ -44,12 +44,11 @@ func (f FileProcessor) CalculateMovingAverageFromFile(filename string, windowSiz
 		if err = json.Unmarshal(line, &event); err != nil {
 			return fmt.Errorf("failed to decode line as JSON: %w", err)
 		}
-		err = f.app.ProcessEvent(event)
-		if err != nil {
+		if err = f.app.ProcessEvent(event); err != nil {
 			return fmt.Errorf("error while processing event: %w", err)
 		}
 	}
-	if err := scanner.Err(); err != nil {
+	if err = scanner.Err(); err != nil {
 		return fmt.Errorf("error scanning file: %w", err)
 	}
 
