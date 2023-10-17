@@ -1,4 +1,4 @@
-package infrastructure
+package outbound
 
 import (
 	"encoding/json"

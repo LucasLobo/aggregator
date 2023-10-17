@@ -1,4 +1,4 @@
-package infrastructureprt
+package outboundprt
 
 import (
 	"github.com/lucaslobo/aggregator-cli/internal/core/domain"

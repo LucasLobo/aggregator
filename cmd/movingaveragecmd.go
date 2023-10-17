@@ -14,9 +14,9 @@ import (
 	"github.com/lucaslobo/aggregator-cli/internal/common/logs"
 	"github.com/lucaslobo/aggregator-cli/internal/common/sqs"
 	"github.com/lucaslobo/aggregator-cli/internal/core/application"
-	"github.com/lucaslobo/aggregator-cli/internal/core/infrastructureprt"
-	"github.com/lucaslobo/aggregator-cli/internal/infrastructure"
-	"github.com/lucaslobo/aggregator-cli/internal/interactors"
+	"github.com/lucaslobo/aggregator-cli/internal/core/outboundprt"
+	"github.com/lucaslobo/aggregator-cli/internal/inbound"
+	"github.com/lucaslobo/aggregator-cli/internal/outbound"
 )
 
 const (
@@ -35,7 +35,7 @@ type cmdCfg struct {
 	inputFile    string
 	outputFolder string
 
-	storer infrastructureprt.MovingAverageStorer
+	storer outboundprt.MovingAverageStorer
 	app    application.Application
 }
 
@@ -98,12 +98,12 @@ func initCmd(ctx *cli.Context) (cmdCfg, error) {
 		return cmdCfg{}, errors.New("cannot provide both input file and queue URL")
 	}
 
-	var storer infrastructureprt.MovingAverageStorer
+	var storer outboundprt.MovingAverageStorer
 	if outputFolder != "" {
-		storer = infrastructure.NewFileWriter(logger, outputFolder)
+		storer = outbound.NewFileWriter(logger, outputFolder)
 	} else {
 		logger.Warn("Output folder not provided, writing to stdout instead")
-		storer = infrastructure.NewStdOut()
+		storer = outbound.NewStdOut()
 	}
 
 	app := application.New(storer)
@@ -127,7 +127,7 @@ func processFromFile(_ *cli.Context, cfg cmdCfg) error {
 		windowSizeFlagPropName, cfg.windowSize)
 
 	start := time.Now()
-	fileProcessor := interactors.NewFileProcessor(cfg.logger, cfg.app)
+	fileProcessor := inbound.NewFileProcessor(cfg.logger, cfg.app)
 
 	err := fileProcessor.CalculateMovingAverageFromFile(cfg.inputFile, cfg.windowSize)
 	if err != nil {
@@ -160,7 +160,7 @@ func processFromQueue(ctx *cli.Context, cfg cmdCfg) error {
 	}
 	q := sqs.NewClient(queueCfg)
 
-	queueConsumer := interactors.NewQueueConsumer(cfg.logger, q, cfg.app)
+	queueConsumer := inbound.NewQueueConsumer(cfg.logger, q, cfg.app)
 	cfg.logger.Info("Message poller starting...")
 	queueConsumer.PollAndProcess(ctx.Context, cfg.windowSize)
 

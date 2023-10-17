@@ -9,7 +9,7 @@ import (
 	awsSQSTypes "github.com/aws/aws-sdk-go-v2/service/sqs/types"
 
 	"github.com/lucaslobo/aggregator-cli/internal/common/logs"
-	"github.com/lucaslobo/aggregator-cli/internal/interactors"
+	"github.com/lucaslobo/aggregator-cli/internal/inbound"
 )
 
 // client is a wrapper for the SQS client that makes working with SQS simpler
@@ -22,7 +22,7 @@ type client struct {
 }
 
 // NewClient Creates a new SQS client wrapper
-func NewClient(cfg ConfigSQS) interactors.Queue {
+func NewClient(cfg ConfigSQS) inbound.Queue {
 	return client{
 		logger:              cfg.Logger,
 		sqsClient:           cfg.SqsClient,

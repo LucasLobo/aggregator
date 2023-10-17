@@ -1,4 +1,4 @@
-package interactorprt
+package inboundprt
 
 import (
 	"github.com/lucaslobo/aggregator-cli/internal/core/domain"

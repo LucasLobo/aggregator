@@ -5,16 +5,16 @@ import (
 	"time"
 
 	"github.com/lucaslobo/aggregator-cli/internal/core/domain"
-	"github.com/lucaslobo/aggregator-cli/internal/core/infrastructureprt"
+	"github.com/lucaslobo/aggregator-cli/internal/core/outboundprt"
 )
 
 type Application struct {
-	storer infrastructureprt.MovingAverageStorer
+	storer outboundprt.MovingAverageStorer
 
 	sw *slidingWindow
 }
 
-func New(storer infrastructureprt.MovingAverageStorer) Application {
+func New(storer outboundprt.MovingAverageStorer) Application {
 	return Application{
 		storer: storer,
 	}

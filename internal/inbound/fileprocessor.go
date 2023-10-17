@@ -1,4 +1,4 @@
-package interactors
+package inbound
 
 import (
 	"bufio"
