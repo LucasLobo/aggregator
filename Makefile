@@ -1,7 +1,6 @@
 PROJECT_NAME := aggregator-cli
 
-build: $(PROJECT_NAME)
-$(PROJECT_NAME):
+build:
 	go build -o $(PROJECT_NAME) .
 
 run-default:
