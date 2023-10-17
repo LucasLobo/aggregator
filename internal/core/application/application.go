@@ -82,7 +82,7 @@ func (a *Application) ProcessEvent(event domain.TranslationDelivered) error {
 		}
 
 		adt := domain.AverageDeliveryTime{
-			Date:                a.sw.head,
+			Date:                domain.Time{Time: a.sw.head},
 			AverageDeliveryTime: average,
 		}
 
