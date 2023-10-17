@@ -93,14 +93,14 @@ func TestProcessEvents_OneEvent(t *testing.T) {
 	assert.Equal(t, results, ms.store)
 }
 
-func mustGetTime(t *testing.T, val string) time.Time {
+func mustGetTime(t *testing.T, val string) domain.Time {
 
 	tt, err := time.Parse("2006-01-02 15:04:05.999999", val)
 	if err != nil {
 		assert.FailNow(t, "Couldn't parse time", err)
 	}
 
-	return tt
+	return domain.Time{Time: tt}
 }
 
 func createEvents(t *testing.T, numberOfEvents int) []domain.TranslationDelivered {
