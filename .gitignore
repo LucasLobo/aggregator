@@ -2,6 +2,6 @@
 .DS_Store
 vendor/
 
-events_*.json
+data/output/events_*.json
 
 aggregator-cli
