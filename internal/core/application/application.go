@@ -42,47 +42,48 @@ type slidingWindow struct {
 func (a *Application) ProcessEvent(event domain.TranslationDelivered) error {
 	bucket := event.Timestamp.Truncate(time.Minute).Add(time.Minute)
 
+	sw := a.sw
 	// we must initialize the values when the first event is processed
-	if a.sw.start.IsZero() {
+	if sw.start.IsZero() {
 		start := bucket.Add(-time.Minute)
-		a.sw.start = start
-		a.sw.head = start
-		a.sw.tail = start
+		sw.start = start
+		sw.head = start
+		sw.tail = start
 	}
 
 	// We must iterate X times until we get to the current event time bucket
-	for beforeOrEqual(a.sw.head, bucket) {
+	for beforeOrEqual(sw.head, bucket) {
 
-		a.sw.buckets[a.sw.head] = state{}
+		sw.buckets[sw.head] = state{}
 
 		// when we are at the time bucket of the current event, we add it to the state
-		if a.sw.head.Equal(bucket) {
-			a.sw.state.count += 1
-			a.sw.state.duration += event.Duration
-			a.sw.buckets[a.sw.head] = state{
+		if sw.head.Equal(bucket) {
+			sw.state.count += 1
+			sw.state.duration += event.Duration
+			sw.buckets[sw.head] = state{
 				duration: event.Duration,
 				count:    1,
 			}
 		}
 
 		// when we exceed the current window size, we must remove the last item and advance the tail
-		if len(a.sw.buckets) > a.sw.windowSize {
-			a.sw.state.count -= a.sw.buckets[a.sw.tail].count
-			a.sw.state.duration -= a.sw.buckets[a.sw.tail].duration
+		if len(sw.buckets) > sw.windowSize {
+			sw.state.count -= sw.buckets[sw.tail].count
+			sw.state.duration -= sw.buckets[sw.tail].duration
 
-			delete(a.sw.buckets, a.sw.tail)
-			a.sw.tail = a.sw.tail.Add(time.Minute)
+			delete(sw.buckets, sw.tail)
+			sw.tail = sw.tail.Add(time.Minute)
 		}
 
 		// once we're done, we calculate the average for the current position
 		average := float32(0)
-		if a.sw.state.count != 0 {
+		if sw.state.count != 0 {
 			// let's not divide by 0 ;)
-			average = float32(a.sw.state.duration) / float32(a.sw.state.count)
+			average = float32(sw.state.duration) / float32(sw.state.count)
 		}
 
 		adt := domain.AverageDeliveryTime{
-			Date:                domain.Time{Time: a.sw.head},
+			Date:                domain.Time{Time: sw.head},
 			AverageDeliveryTime: average,
 		}
 
@@ -92,7 +93,7 @@ func (a *Application) ProcessEvent(event domain.TranslationDelivered) error {
 		}
 
 		// at the end we must advance the head to keep going
-		a.sw.head = a.sw.head.Add(time.Minute)
+		sw.head = sw.head.Add(time.Minute)
 	}
 	return nil
 }
