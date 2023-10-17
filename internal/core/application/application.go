@@ -1,7 +1,6 @@
 package application
 
 import (
-	"errors"
 	"time"
 
 	"github.com/lucaslobo/aggregator-cli/internal/core/domain"
@@ -10,13 +9,16 @@ import (
 
 type Application struct {
 	storer outboundprt.MovingAverageStorer
-
-	sw *slidingWindow
+	sw     *slidingWindow
 }
 
-func New(storer outboundprt.MovingAverageStorer) Application {
-	return Application{
+func New(windowSize int, storer outboundprt.MovingAverageStorer) *Application {
+	return &Application{
 		storer: storer,
+		sw: &slidingWindow{
+			windowSize: windowSize,
+			buckets:    map[time.Time]state{},
+		},
 	}
 }
 
@@ -35,19 +37,9 @@ type slidingWindow struct {
 	tail  time.Time
 }
 
-func (a *Application) Init(windowSize int) {
-	a.sw = &slidingWindow{
-		windowSize: windowSize,
-		buckets:    map[time.Time]state{},
-	}
-}
-
 // ProcessEvent calculates the moving average for all time-buckets since the last event. If this is the first event
 // it initializes the time-buckets. The moving-average is calculated based on the windowSize provided in the Init method
 func (a *Application) ProcessEvent(event domain.TranslationDelivered) error {
-	if a.sw == nil {
-		return errors.New("must init first")
-	}
 	bucket := event.Timestamp.Truncate(time.Minute).Add(time.Minute)
 
 	// we must initialize the values when the first event is processed

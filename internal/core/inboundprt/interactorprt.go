@@ -5,5 +5,5 @@ import (
 )
 
 type MovingAverageCalculator interface {
-	CalculateMovingAverage(events []domain.TranslationDelivered, windowSize int) error
+	ProcessEvent(event domain.TranslationDelivered) error
 }

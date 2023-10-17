@@ -61,11 +61,10 @@ func TestProcessEvents_WindowSize(t *testing.T) {
 			ms := mockStorer{
 				t: t,
 			}
-			a := New(&ms)
+			a := New(tc.windowSize, &ms)
 
 			events := createEvents(t, 3)
 			results := createResultsWindow(t, tc.windowSize)
-			a.Init(tc.windowSize)
 
 			for _, event := range events {
 				err := a.ProcessEvent(event)
@@ -81,11 +80,10 @@ func TestProcessEvents_OneEvent(t *testing.T) {
 	ms := mockStorer{
 		t: t,
 	}
-	a := New(&ms)
+	a := New(10, &ms)
 
 	events := createEvents(t, 1)
 	results := createResultsWindow(t, 10)[0:2]
-	a.Init(10)
 
 	for _, event := range events {
 		err := a.ProcessEvent(event)

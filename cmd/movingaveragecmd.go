@@ -14,6 +14,7 @@ import (
 	"github.com/lucaslobo/aggregator-cli/internal/common/logs"
 	"github.com/lucaslobo/aggregator-cli/internal/common/sqs"
 	"github.com/lucaslobo/aggregator-cli/internal/core/application"
+	"github.com/lucaslobo/aggregator-cli/internal/core/inboundprt"
 	"github.com/lucaslobo/aggregator-cli/internal/core/outboundprt"
 	"github.com/lucaslobo/aggregator-cli/internal/inbound"
 	"github.com/lucaslobo/aggregator-cli/internal/outbound"
@@ -36,7 +37,7 @@ type cmdCfg struct {
 	outputFolder string
 
 	storer outboundprt.MovingAverageStorer
-	app    application.Application
+	svc    inboundprt.MovingAverageCalculator
 }
 
 // MovingAverageCommand is the command to calculate the moving average aggregation from a file.
@@ -106,7 +107,7 @@ func initCmd(ctx *cli.Context) (cmdCfg, error) {
 		storer = outbound.NewStdOut()
 	}
 
-	app := application.New(storer)
+	svc := application.New(windowSize, storer)
 
 	cfg := cmdCfg{
 		logger:       logger,
@@ -115,7 +116,7 @@ func initCmd(ctx *cli.Context) (cmdCfg, error) {
 		inputFile:    inputFile,
 		outputFolder: outputFolder,
 		storer:       storer,
-		app:          app,
+		svc:          svc,
 	}
 
 	return cfg, nil
@@ -127,9 +128,9 @@ func processFromFile(_ *cli.Context, cfg cmdCfg) error {
 		windowSizeFlagPropName, cfg.windowSize)
 
 	start := time.Now()
-	fileProcessor := inbound.NewFileProcessor(cfg.logger, cfg.app)
+	fileProcessor := inbound.NewFileProcessor(cfg.logger, cfg.svc)
 
-	err := fileProcessor.CalculateMovingAverageFromFile(cfg.inputFile, cfg.windowSize)
+	err := fileProcessor.CalculateMovingAverageFromFile(cfg.inputFile)
 	if err != nil {
 		return err
 	}
@@ -160,9 +161,9 @@ func processFromQueue(ctx *cli.Context, cfg cmdCfg) error {
 	}
 	q := sqs.NewClient(queueCfg)
 
-	queueConsumer := inbound.NewQueueConsumer(cfg.logger, q, cfg.app)
+	queueConsumer := inbound.NewQueueConsumer(cfg.logger, q, cfg.svc)
 	cfg.logger.Info("Message poller starting...")
-	queueConsumer.PollAndProcess(ctx.Context, cfg.windowSize)
+	queueConsumer.PollAndProcess(ctx.Context)
 
 	return nil
 }

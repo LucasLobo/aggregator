@@ -38,7 +38,7 @@ func (f *FileWriter) Close() error {
 }
 
 func (f *FileWriter) setupJSONEncoder() error {
-	if f.encoder != nil {
+	if f.encoder != nil && f.file != nil {
 		return nil
 	}
 

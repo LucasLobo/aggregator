@@ -9,8 +9,8 @@ import (
 	awsSQSTypes "github.com/aws/aws-sdk-go-v2/service/sqs/types"
 
 	"github.com/lucaslobo/aggregator-cli/internal/common/logs"
-	"github.com/lucaslobo/aggregator-cli/internal/core/application"
 	"github.com/lucaslobo/aggregator-cli/internal/core/domain"
+	"github.com/lucaslobo/aggregator-cli/internal/core/inboundprt"
 )
 
 type Queue interface {
@@ -24,21 +24,19 @@ type QueueConsumer struct {
 	logger logs.Logger
 
 	queueClient Queue
-	app         application.Application
+	svc         inboundprt.MovingAverageCalculator
 }
 
-func NewQueueConsumer(logger logs.Logger, queueClient Queue, app application.Application) QueueConsumer {
+func NewQueueConsumer(logger logs.Logger, queueClient Queue, svc inboundprt.MovingAverageCalculator) QueueConsumer {
 	return QueueConsumer{
 		logger:      logger,
 		queueClient: queueClient,
-		app:         app,
+		svc:         svc,
 	}
 }
 
 // PollAndProcess polls the queue and processes the messages
-func (c *QueueConsumer) PollAndProcess(ctx context.Context, windowSize int) {
-	c.app.Init(windowSize)
-
+func (c *QueueConsumer) PollAndProcess(ctx context.Context) {
 	// indefinitely poll queue for messages
 	for {
 		messages, err := c.readQueueMessages(ctx)
@@ -82,7 +80,7 @@ func (c *QueueConsumer) processMessages(ctx context.Context, messages []awsSQSTy
 				return
 			}
 
-			err = c.app.ProcessEvent(event)
+			err = c.svc.ProcessEvent(event)
 			if err != nil {
 				c.logger.Errorw("could not process message", "error", err)
 				return
