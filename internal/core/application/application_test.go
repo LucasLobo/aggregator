@@ -1,9 +1,9 @@
 package application
 
 import (
+	"encoding/json"
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/lucaslobo/aggregator-cli/internal/core/domain"
 	"github.com/stretchr/testify/assert"
@@ -94,16 +94,19 @@ func TestProcessEvents_OneEvent(t *testing.T) {
 }
 
 func mustGetTime(t *testing.T, val string) domain.Time {
-
-	tt, err := time.Parse("2006-01-02 15:04:05.999999", val)
+	var tt domain.Time
+	err := json.Unmarshal([]byte("\""+val+"\""), &tt)
 	if err != nil {
 		assert.FailNow(t, "Couldn't parse time", err)
 	}
-
-	return domain.Time{Time: tt}
+	return tt
 }
 
 func createEvents(t *testing.T, numberOfEvents int) []domain.TranslationDelivered {
+	if numberOfEvents > 3 {
+		// failsafe - if we wish to define more than 3 events, must increase the size of the slice below
+		assert.FailNow(t, "number of events must be <= 3")
+	}
 	return []domain.TranslationDelivered{
 		{
 			Timestamp: mustGetTime(t, "2018-12-26 18:11:08.509654"),
