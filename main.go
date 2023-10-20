@@ -11,11 +11,11 @@ import (
 
 const (
 	// Name of service
-	Name = "service-base-go"
+	Name = "aggregator-cli"
 )
 
 var (
-	// Version of service
+	// Version of service - this would be replaced with LDFLAGS
 	Version = "1.0.0"
 )
 
