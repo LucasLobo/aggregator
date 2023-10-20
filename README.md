@@ -3,41 +3,44 @@
 Simple command line application that calculates an aggregated metric based on the input events.
 
 The input events can be fetched from a file or from AWS SQS. The output events can be written to a file or to the stdout.
+
 ## Aggregation Methods
+
 - Moving average - calculate the moving average for the last X minutes.
 
 ## Context
+
 One of the metrics we use for our clients' SLAs is the delivery time of a translation. In the context of this problem,
 our translation flow is modeled as only one event. We wish to calculate the moving average for these events.
 
-### *translation_delivered*
+### _translation_delivered_
 
 Example:
 
 ```json
 {
-    "timestamp": "2018-12-26 18:12:19.903159",
-    "translation_id": "5aa5b2f39f7254a75aa4",
-    "source_language": "en",
-    "target_language": "fr",
-    "client_name": "airliberty",
-    "event_name": "translation_delivered",
-    "duration": 20,
-    "nr_words": 100
+  "timestamp": "2018-12-26 18:12:19.903159",
+  "translation_id": "5aa5b2f39f7254a75aa4",
+  "source_language": "en",
+  "target_language": "fr",
+  "client_name": "airliberty",
+  "event_name": "translation_delivered",
+  "duration": 20,
+  "nr_words": 100
 }
 ```
 
 ## Quick Start
 
-To calculate, for each minute, the 10-minute window moving average delivery time of all translations you should call the 
+To calculate, for each minute, the 10-minute window moving average delivery time of all translations you should call the
 application like this:
 
-	./aggregator-cli moving-average --window_size 10 --input_file data/events.json --output_folder data/output
+    ./aggregator-cli moving-average --window_size 10 --input_file data/events.json --output_folder data/output
 
 or simply:
 
     make example
-	
+
 The input file must have the following format:
 
 ```
@@ -46,7 +49,7 @@ The input file must have the following format:
 {"timestamp": "2018-12-26 18:23:19.903159","translation_id": "5aa5b2f39f7254a75bb3","source_language": "en","target_language": "fr","client_name": "taxi-eats","event_name": "translation_delivered","nr_words": 100, "duration": 54}
 ```
 
-Each line must be the json of a single event. The lines in the input must be ordered by the `timestamp` key, from lower 
+Each line must be the json of a single event. The lines in the input must be ordered by the `timestamp` key, from lower
 (oldest) to higher values (newest), just like in the example input above.
 
 The output file will have the following format.
@@ -73,13 +76,14 @@ The output file will have the following format.
 Below are the flags that can be used to configure the tool:
 
 | Flag          | Usage                                                                | Mandatory | Note                                                      |
-|---------------|----------------------------------------------------------------------|-----------|-----------------------------------------------------------|
-| window_size   | Window size (minutes) to use in the moving average calculation       | `true`    | Defaults to 10 if < 1                                     | 
-| input_file    | Relative path to the file where the input events are stored          | `false`   | Either `input_file` or `queue_url` must be provided       | 
-| queue_url     | SQS Queue from which to read the events                              | `false`   | Either `input_file` or `queue_url` must be provided       | 
-| output_folder | Relative path to the folder where output events will be written into | `false`   | If none is provided, output will be printed to the stdout | 
+| ------------- | -------------------------------------------------------------------- | --------- | --------------------------------------------------------- |
+| window_size   | Window size (minutes) to use in the moving average calculation       | `true`    | Defaults to 10 if < 1                                     |
+| input_file    | Relative path to the file where the input events are stored          | `false`   | Either `input_file` or `queue_url` must be provided       |
+| queue_url     | SQS Queue from which to read the events                              | `false`   | Either `input_file` or `queue_url` must be provided       |
+| output_folder | Relative path to the folder where output events will be written into | `false`   | If none is provided, output will be printed to the stdout |
 
 ## Reading from AQS SQS Queue
+
 To read from an AWS SQS queue you must:
 
 1. Create an AWS SQS Queue (must be FIFO!).
@@ -93,14 +97,14 @@ An example input file is provided in `data/input.json`.
 
 ## Project Structure
 
-This project is *slightly* over-engineered for this purpose. The motivation for this was not only to complete 
+This project is _slightly_ over-engineered for this purpose. The motivation for this was not only to complete
 the code challenge but also to experiment with the hexagonal architecture pattern.
 
 To put it simply, the hexagonal architecture is used isolate the business logic from the input and output processing. This
-means that the business logic doesn't need to know whether the data is being fed via HTTP, SQS, a file, etc., and whether 
+means that the business logic doesn't need to know whether the data is being fed via HTTP, SQS, a file, etc., and whether
 the data is being stored in a file, logged, or sent to SNS.
-For this reason the project can be easily extended to read from other input sources and to emit events with the results 
-instead of writing them to files/stdout (e.g., using AWS SNS). It's also simple to create new aggregation methods besides 
+For this reason the project can be easily extended to read from other input sources and to emit events with the results
+instead of writing them to files/stdout (e.g., using AWS SNS). It's also simple to create new aggregation methods besides
 moving average.
 
 ```
@@ -113,7 +117,7 @@ moving average.
         ├── infrastructureprt     // Ports (interfaces) for infrastructure
         └── interactorprt         // Ports (interfaces) for interactors
     ├── infrastructure            // Primary/Driving adapters - entrypoint (e.g., files, queues, api, etc)
-    └── interactors               // Secondary/Driven adapters (e.g., files, databases, etc). 
+    └── interactors               // Secondary/Driven adapters (e.g., files, databases, etc).
 ```
 
 ## FAQ
@@ -139,17 +143,18 @@ since we store the partial averages for each time-bucket in the window.
 A4.1: With this algorithm we only calculate the moving average for each time-bucket the moment an event arrives. This
 means that in a real-world scenario we would be idle until that time. We could pre-configure a maximum threshold of
 waiting time to starting processing the next time-bucket (e.g., if we have two events one hour apart, we would be
-waiting for 60 minutes and then process 60 time-buckets at once. If we add a threshold of 3 minutes, we could process 
+waiting for 60 minutes and then process 60 time-buckets at once. If we add a threshold of 3 minutes, we could process
 time-bucket of minute 1 at minute 4, minute 2 at minute 5, etc., instead of waiting another 60 minutes).  
 A4.2: Additionally, since we read from the file one-by-one and write to the file one-by-one, we lose some time for each
-fetch and each store. We could also put the fetch and store processes in separate go-routines and run them concurrently to 
+fetch and each store. We could also put the fetch and store processes in separate go-routines and run them concurrently to
 save some IO time.
 
 **Q5: What could you have done to make this even better?**  
 A5: There are a couple of things that could have been done to improve this solution:
+
 - Emit output events to AWS SNS or similar.
 - Add e2e/integration tests to ensure that the file reading and writing work as well as the algorithm
-itself.
+  itself.
 - Add more unit tests. Including in other parts of the architecture (outside the business logic).
 - Add Docker.
 - Improve the Makefile.
@@ -159,4 +164,4 @@ itself.
 
 ## Algorithm Diagram
 
-![Sliding Window](sliding_window.jpg)
+![Sliding Window](sliding_window.png)
