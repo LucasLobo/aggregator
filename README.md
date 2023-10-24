@@ -112,12 +112,12 @@ moving average.
 └── internal                      // Everything that is internal to the application
     ├── common                    // Common modules used in multiple places within application
     ├── core                      // Core (business logic)
-        ├── application           // Business logic. Implements interactorprt and uses infrastructureprt
+        ├── application           // Business logic. Implements inboundprt and uses outboundprt
         ├── domain                // Business models
-        ├── infrastructureprt     // Ports (interfaces) for infrastructure
-        └── interactorprt         // Ports (interfaces) for interactors
-    ├── infrastructure            // Primary/Driving adapters - entrypoint (e.g., files, queues, api, etc)
-    └── interactors               // Secondary/Driven adapters (e.g., files, databases, etc).
+        ├── outboundprt           // Ports (interfaces) for outbound connectors
+        └── inboundprt            // Ports (interfaces) for inbound connectors
+    ├── outbound                  // Primary/Driving adapters - entrypoint (e.g., REST API Server, Queues, etc)
+    └── inbound                   // Secondary/Driven adapters (e.g., databases, external apis).
 ```
 
 ## FAQ
