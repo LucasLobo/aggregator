@@ -17,6 +17,18 @@ type Time struct {
 	time.Time
 }
 
+func NewTime(t time.Time) Time {
+	return Time{t}
+}
+
+func (t Time) Bucket() time.Time {
+	return newBucket(t.Time)
+}
+
+func newBucket(t time.Time) time.Time {
+	return t.Truncate(time.Minute).Add(time.Minute)
+}
+
 func (t Time) MarshalJSON() ([]byte, error) {
 	return json.Marshal(t.Time.Format(outputTimeLayout))
 }

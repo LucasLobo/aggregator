@@ -8,16 +8,15 @@ import (
 
 	"github.com/lucaslobo/aggregator/internal/common/closer"
 	"github.com/lucaslobo/aggregator/internal/common/logs"
-	"github.com/lucaslobo/aggregator/internal/core/domain"
-	"github.com/lucaslobo/aggregator/internal/core/inboundprt"
+	"github.com/lucaslobo/aggregator/internal/domain"
 )
 
 type FileProcessor struct {
 	logger logs.Logger
-	svc    inboundprt.MovingAverageCalculator
+	svc    MovingAverageCalculator
 }
 
-func NewFileProcessor(logger logs.Logger, svc inboundprt.MovingAverageCalculator) FileProcessor {
+func NewFileProcessor(logger logs.Logger, svc MovingAverageCalculator) FileProcessor {
 	return FileProcessor{
 		logger: logger,
 		svc:    svc,
@@ -37,7 +36,7 @@ func (f FileProcessor) CalculateMovingAverageFromFile(filename string) error {
 
 	for scanner.Scan() {
 		line := scanner.Bytes()
-		var event domain.TranslationDelivered
+		var event domain.DurationEvent
 		if err = json.Unmarshal(line, &event); err != nil {
 			return fmt.Errorf("failed to decode line as JSON: %w", err)
 		}
