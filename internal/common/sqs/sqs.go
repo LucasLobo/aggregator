@@ -8,8 +8,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	awsSQSTypes "github.com/aws/aws-sdk-go-v2/service/sqs/types"
 
-	"github.com/lucaslobo/aggregator-cli/internal/common/logs"
-	"github.com/lucaslobo/aggregator-cli/internal/inbound"
+	"github.com/lucaslobo/aggregator/internal/common/logs"
+	"github.com/lucaslobo/aggregator/internal/inbound"
 )
 
 // client is a wrapper for the SQS client that makes working with SQS simpler

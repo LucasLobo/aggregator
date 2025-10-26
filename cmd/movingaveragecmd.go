@@ -10,14 +10,14 @@ import (
 	awsSqs "github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/urfave/cli/v2"
 
-	"github.com/lucaslobo/aggregator-cli/internal/common/closer"
-	"github.com/lucaslobo/aggregator-cli/internal/common/logs"
-	"github.com/lucaslobo/aggregator-cli/internal/common/sqs"
-	"github.com/lucaslobo/aggregator-cli/internal/core/application"
-	"github.com/lucaslobo/aggregator-cli/internal/core/inboundprt"
-	"github.com/lucaslobo/aggregator-cli/internal/core/outboundprt"
-	"github.com/lucaslobo/aggregator-cli/internal/inbound"
-	"github.com/lucaslobo/aggregator-cli/internal/outbound"
+	"github.com/lucaslobo/aggregator/internal/common/closer"
+	"github.com/lucaslobo/aggregator/internal/common/logs"
+	"github.com/lucaslobo/aggregator/internal/common/sqs"
+	"github.com/lucaslobo/aggregator/internal/core/application"
+	"github.com/lucaslobo/aggregator/internal/core/inboundprt"
+	"github.com/lucaslobo/aggregator/internal/core/outboundprt"
+	"github.com/lucaslobo/aggregator/internal/inbound"
+	"github.com/lucaslobo/aggregator/internal/outbound"
 )
 
 const (

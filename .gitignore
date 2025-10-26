@@ -4,4 +4,4 @@ vendor/
 
 data/output/events_*.json
 
-aggregator-cli
+aggregator

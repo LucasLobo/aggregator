@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/lucaslobo/aggregator-cli/internal/common/closer"
-	"github.com/lucaslobo/aggregator-cli/internal/common/logs"
-	"github.com/lucaslobo/aggregator-cli/internal/core/domain"
-	"github.com/lucaslobo/aggregator-cli/internal/core/inboundprt"
+	"github.com/lucaslobo/aggregator/internal/common/closer"
+	"github.com/lucaslobo/aggregator/internal/common/logs"
+	"github.com/lucaslobo/aggregator/internal/core/domain"
+	"github.com/lucaslobo/aggregator/internal/core/inboundprt"
 )
 
 type FileProcessor struct {

@@ -35,7 +35,7 @@ Example:
 To calculate, for each minute, the 10-minute window moving average delivery time of all translations you should call the
 application like this:
 
-    ./aggregator-cli moving-average --window_size 10 --input_file data/events.json --output_folder data/output
+    ./aggregator moving-average --window_size 10 --input_file data/events.json --output_folder data/output
 
 or simply:
 
@@ -88,7 +88,7 @@ To read from an AWS SQS queue you must:
 
 1. Create an AWS SQS Queue (must be FIFO!).
 2. Authenticate AWS locally. Follow [these instructions from AWS Docs](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html). `LoadDefaultConfig` is used to get the values.
-3. Run the CLI like this `./aggregator-cli moving-average --window_size 10 --queue_url QUEUE_URL --output_folder data/output`
+3. Run the CLI like this `./aggregator moving-average --window_size 10 --queue_url QUEUE_URL --output_folder data/output`
 4. Add messages to queue. Each message should have the same format as one of the input lines.
 
 ## Example Input

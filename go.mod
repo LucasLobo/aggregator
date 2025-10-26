@@ -1,4 +1,4 @@
-module github.com/lucaslobo/aggregator-cli
+module github.com/lucaslobo/aggregator
 
 go 1.21
 

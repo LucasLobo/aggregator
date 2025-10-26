@@ -3,7 +3,7 @@ package closer
 import (
 	"io"
 
-	"github.com/lucaslobo/aggregator-cli/internal/common/logs"
+	"github.com/lucaslobo/aggregator/internal/common/logs"
 )
 
 // Close the provided io.Closer and log on error
