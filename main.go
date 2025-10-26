@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/lucaslobo/aggregator-cli/cmd"
-	"github.com/lucaslobo/aggregator-cli/internal/common/logs"
+	"github.com/lucaslobo/aggregator/cmd"
+	"github.com/lucaslobo/aggregator/internal/common/logs"
 	"github.com/urfave/cli/v2"
 )
 
 const (
 	// Name of service
-	Name = "aggregator-cli"
+	Name = "aggregator"
 )
 
 var (

@@ -1,7 +1,7 @@
 package inboundprt
 
 import (
-	"github.com/lucaslobo/aggregator-cli/internal/core/domain"
+	"github.com/lucaslobo/aggregator/internal/core/domain"
 )
 
 type MovingAverageCalculator interface {

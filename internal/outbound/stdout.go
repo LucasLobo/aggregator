@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/lucaslobo/aggregator-cli/internal/core/domain"
+	"github.com/lucaslobo/aggregator/internal/core/domain"
 )
 
 // StdOut is a simple implementation of a MovingAverageStorer that simply writes to the std output.

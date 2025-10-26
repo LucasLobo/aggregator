@@ -1,4 +1,4 @@
-PROJECT_NAME := aggregator-cli
+PROJECT_NAME := aggregator
 
 build:
 	go build -o $(PROJECT_NAME) .

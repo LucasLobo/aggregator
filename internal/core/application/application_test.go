@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/lucaslobo/aggregator-cli/internal/core/domain"
+	"github.com/lucaslobo/aggregator/internal/core/domain"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

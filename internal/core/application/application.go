@@ -3,8 +3,8 @@ package application
 import (
 	"time"
 
-	"github.com/lucaslobo/aggregator-cli/internal/core/domain"
-	"github.com/lucaslobo/aggregator-cli/internal/core/outboundprt"
+	"github.com/lucaslobo/aggregator/internal/core/domain"
+	"github.com/lucaslobo/aggregator/internal/core/outboundprt"
 )
 
 type Application struct {

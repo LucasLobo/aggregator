@@ -6,8 +6,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/lucaslobo/aggregator-cli/internal/common/logs"
-	"github.com/lucaslobo/aggregator-cli/internal/core/domain"
+	"github.com/lucaslobo/aggregator/internal/common/logs"
+	"github.com/lucaslobo/aggregator/internal/core/domain"
 )
 
 // FileWriter is an implementation of a MovingAverageStorer that writes to a file.
