@@ -9,6 +9,20 @@ import (
 )
 
 func TestProcessEvents_WindowSize(t *testing.T) {
+	input := []DurationEvent{
+		{
+			Timestamp: parseTime(t, "2018-12-26 18:11:08.509654"),
+			Duration:  20,
+		},
+		{
+			Timestamp: parseTime(t, "2018-12-26 18:15:19.903159"),
+			Duration:  31,
+		},
+		{
+			Timestamp: parseTime(t, "2018-12-26 18:23:19.903159"),
+			Duration:  54,
+		},
+	}
 
 	tests := []struct {
 		windowSize int
@@ -31,10 +45,9 @@ func TestProcessEvents_WindowSize(t *testing.T) {
 		t.Run(fmt.Sprintf("window size: %d", tc.windowSize), func(t *testing.T) {
 			sw := NewSlidingWindow(tc.windowSize)
 
-			events := createEvents(t, 3)
-			expectedResults := createResultsWindow(t, tc.windowSize)
+			expectedResults := createResultsByWindowSize(t, tc.windowSize)
 			var actualResults []AverageDeliveryTime
-			for _, event := range events {
+			for _, event := range input {
 				partial := sw.Process(event)
 				actualResults = append(actualResults, partial...)
 
@@ -73,28 +86,7 @@ func TestProcessEvents_OneEvent(t *testing.T) {
 	assert.Equal(t, expectedResults, actualResults)
 }
 
-func createEvents(t *testing.T, numberOfEvents int) []DurationEvent {
-	if numberOfEvents > 3 {
-		// failsafe - if we wish to define more than 3 events, must increase the size of the slice below
-		assert.FailNow(t, "number of events must be <= 3")
-	}
-	return []DurationEvent{
-		{
-			Timestamp: parseTime(t, "2018-12-26 18:11:08.509654"),
-			Duration:  20,
-		},
-		{
-			Timestamp: parseTime(t, "2018-12-26 18:15:19.903159"),
-			Duration:  31,
-		},
-		{
-			Timestamp: parseTime(t, "2018-12-26 18:23:19.903159"),
-			Duration:  54,
-		},
-	}[0:numberOfEvents]
-}
-
-func createResultsWindow(t *testing.T, windowSize int) []AverageDeliveryTime {
+func createResultsByWindowSize(t *testing.T, windowSize int) []AverageDeliveryTime {
 	switch windowSize {
 	case 1:
 		return createResultsWindowSize1(t)

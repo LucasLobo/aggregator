@@ -26,7 +26,7 @@ func NewSlidingWindow(windowSize int) *SlidingWindow {
 
 }
 
-func (sw *SlidingWindow) Process(event DurationEvent) []AverageDeliveryTime {
+func (sw *SlidingWindow) Ingest(event DurationEvent) []AverageDeliveryTime {
 
 	bucket := event.Timestamp.Truncate(time.Minute).Add(time.Minute)
 
