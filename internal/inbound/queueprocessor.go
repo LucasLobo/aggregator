@@ -9,8 +9,7 @@ import (
 	awsSQSTypes "github.com/aws/aws-sdk-go-v2/service/sqs/types"
 
 	"github.com/lucaslobo/aggregator/internal/common/logs"
-	"github.com/lucaslobo/aggregator/internal/core/domain"
-	"github.com/lucaslobo/aggregator/internal/core/inboundprt"
+	"github.com/lucaslobo/aggregator/internal/domain"
 )
 
 type Queue interface {
@@ -24,10 +23,10 @@ type QueueConsumer struct {
 	logger logs.Logger
 
 	queueClient Queue
-	svc         inboundprt.MovingAverageCalculator
+	svc         MovingAverageCalculator
 }
 
-func NewQueueConsumer(logger logs.Logger, queueClient Queue, svc inboundprt.MovingAverageCalculator) QueueConsumer {
+func NewQueueConsumer(logger logs.Logger, queueClient Queue, svc MovingAverageCalculator) QueueConsumer {
 	return QueueConsumer{
 		logger:      logger,
 		queueClient: queueClient,
@@ -70,7 +69,7 @@ func (c *QueueConsumer) processMessages(ctx context.Context, messages []awsSQSTy
 	c.logger.Infow("read messages from queue", "quantity", len(messages))
 	for _, message := range messages {
 		if message.Body != nil {
-			var event domain.TranslationDelivered
+			var event domain.DurationEvent
 			err := json.Unmarshal([]byte(*message.Body), &event)
 			if err != nil {
 				// for simplicity purposes, when an error occurs we simply log it...

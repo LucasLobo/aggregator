@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"io"
 	"strings"
 	"time"
 
@@ -10,12 +11,10 @@ import (
 	awsSqs "github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/urfave/cli/v2"
 
+	"github.com/lucaslobo/aggregator/internal/application"
 	"github.com/lucaslobo/aggregator/internal/common/closer"
 	"github.com/lucaslobo/aggregator/internal/common/logs"
 	"github.com/lucaslobo/aggregator/internal/common/sqs"
-	"github.com/lucaslobo/aggregator/internal/core/application"
-	"github.com/lucaslobo/aggregator/internal/core/inboundprt"
-	"github.com/lucaslobo/aggregator/internal/core/outboundprt"
 	"github.com/lucaslobo/aggregator/internal/inbound"
 	"github.com/lucaslobo/aggregator/internal/outbound"
 )
@@ -36,8 +35,8 @@ type cmdCfg struct {
 	inputFile    string
 	outputFolder string
 
-	storer outboundprt.MovingAverageStorer
-	svc    inboundprt.MovingAverageCalculator
+	storerCloser io.Closer
+	svc          *application.Application
 }
 
 // MovingAverageCommand is the command to calculate the moving average aggregation from a file.
@@ -58,7 +57,7 @@ func runMovingAverageCommand(ctx *cli.Context) error {
 		return err
 	}
 
-	defer closer.Close(cfg.logger, cfg.storer)
+	defer closer.Close(cfg.logger, cfg.storerCloser)
 
 	if cfg.inputFile != "" {
 		err = processFromFile(ctx, cfg)
@@ -99,15 +98,18 @@ func initCmd(ctx *cli.Context) (cmdCfg, error) {
 		return cmdCfg{}, errors.New("cannot provide both input file and queue URL")
 	}
 
-	var storer outboundprt.MovingAverageStorer
+	var storerCloser io.Closer
+	var app *application.Application
 	if outputFolder != "" {
-		storer = outbound.NewFileWriter(logger, outputFolder)
+		storer := outbound.NewFileWriter(logger, outputFolder)
+		app = application.New(windowSize, storer)
+		storerCloser = storer
 	} else {
 		logger.Warn("Output folder not provided, writing to stdout instead")
-		storer = outbound.NewStdOut()
+		storer := outbound.NewStdOut()
+		app = application.New(windowSize, storer)
+		storerCloser = storer
 	}
-
-	svc := application.New(windowSize, storer)
 
 	cfg := cmdCfg{
 		logger:       logger,
@@ -115,8 +117,8 @@ func initCmd(ctx *cli.Context) (cmdCfg, error) {
 		queueURL:     queueURL,
 		inputFile:    inputFile,
 		outputFolder: outputFolder,
-		storer:       storer,
-		svc:          svc,
+		storerCloser: storerCloser,
+		svc:          app,
 	}
 
 	return cfg, nil
