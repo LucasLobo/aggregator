@@ -35,8 +35,9 @@ func TestProcessEvents_WindowSize(t *testing.T) {
 			expectedResults := createResultsWindow(t, tc.windowSize)
 			var actualResults []AverageDeliveryTime
 			for _, event := range events {
-				adt := sw.Process(event)
-				actualResults = append(actualResults, adt)
+				partial := sw.Process(event)
+				actualResults = append(actualResults, partial...)
+
 			}
 			assert.Equal(t, expectedResults, actualResults)
 		})
@@ -46,13 +47,29 @@ func TestProcessEvents_WindowSize(t *testing.T) {
 func TestProcessEvents_OneEvent(t *testing.T) {
 	sw := NewSlidingWindow(10)
 
-	events := createEvents(t, 1)
-	expectedResults := createResultsWindow(t, 10)[0:2]
-	var actualResults []AverageDeliveryTime
-	for _, event := range events {
-		adt := sw.Process(event)
-		actualResults = append(actualResults, adt)
+	input := []DurationEvent{
+		{
+			Timestamp: parseTime(t, "2018-12-26 18:11:08.509654"),
+			Duration:  20,
+		},
 	}
+	expectedResults := []AverageDeliveryTime{
+		{
+			Date:                parseTime(t, "2018-12-26 18:11:00.0000"),
+			AverageDeliveryTime: 0,
+		},
+		{
+			Date:                parseTime(t, "2018-12-26 18:12:00.0000"),
+			AverageDeliveryTime: 20,
+		},
+	}
+
+	var actualResults []AverageDeliveryTime
+	for _, event := range input {
+		partial := sw.Process(event)
+		actualResults = append(actualResults, partial...)
+	}
+
 	assert.Equal(t, expectedResults, actualResults)
 }
 

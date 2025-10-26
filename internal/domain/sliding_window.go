@@ -26,7 +26,7 @@ func NewSlidingWindow(windowSize int) *SlidingWindow {
 
 }
 
-func (sw *SlidingWindow) Process(event DurationEvent) AverageDeliveryTime {
+func (sw *SlidingWindow) Process(event DurationEvent) []AverageDeliveryTime {
 
 	bucket := event.Timestamp.Truncate(time.Minute).Add(time.Minute)
 
@@ -37,8 +37,7 @@ func (sw *SlidingWindow) Process(event DurationEvent) AverageDeliveryTime {
 		sw.tail = start
 	}
 
-	var adt AverageDeliveryTime
-
+	var adt []AverageDeliveryTime
 	for beforeOrEqual(sw.head, bucket) {
 		sw.buckets[sw.head] = state{}
 		// when we are at the time bucket of the current event, we add it to the state
@@ -52,7 +51,6 @@ func (sw *SlidingWindow) Process(event DurationEvent) AverageDeliveryTime {
 		}
 
 		// when we exceed the current window size, we must remove the last item and advance the tail
-
 		if len(sw.buckets) > sw.windowSize {
 			sw.state.count -= sw.buckets[sw.tail].count
 			sw.state.duration -= sw.buckets[sw.tail].duration
@@ -61,17 +59,16 @@ func (sw *SlidingWindow) Process(event DurationEvent) AverageDeliveryTime {
 		}
 
 		// once we're done, we calculate the average for the current position
-
 		average := float32(0)
 		if sw.state.count != 0 {
 			// let's not divide by 0 ;)
 			average = float32(sw.state.duration) / float32(sw.state.count)
 
 		}
-		adt = AverageDeliveryTime{
+		adt = append(adt, AverageDeliveryTime{
 			Date:                Time{Time: sw.head},
 			AverageDeliveryTime: average,
-		}
+		})
 
 		// at the end we must advance the head to keep going
 		sw.head = sw.head.Add(time.Minute)
